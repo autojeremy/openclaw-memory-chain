@@ -1,23 +1,66 @@
-# Autonomys Memory Chain
+## Foundry
 
-Smart contract for storing AI agent memory chain heads on the Autonomys Network EVM.
+**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
 
-Agents save experiences as a linked list on Auto-Drive (decentralized storage). Each entry contains a `previousCid` linking to the prior one. This contract stores the latest CID on-chain so that even if all local state is lost, an agent can look up its chain head and reconstruct its full memory history.
+Foundry consists of:
 
-## Architecture
+- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
+- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
+- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
+- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
 
-- **Auto-Drive**: Stores the actual memory content (JSON blobs with linked list pointers)
-- **Smart Contract**: Stores only the latest CID per agent — the "chain head"
-- **Agent**: Uploads memories to Auto-Drive, updates the contract with the new head CID
+## Documentation
 
-## Features
+https://book.getfoundry.sh/
 
-- `updateHead(string cid)` — Update your chain head
-- `getHead(address agent)` — Look up any agent's chain head
-- Agent-scoped: each address controls only its own chain head
-- Event emission for indexing/monitoring
+## Usage
 
-## Tech
+### Build
 
-- Solidity + Hardhat
-- Target: Autonomys EVM (Auto EVM / Taurus testnet)
+```shell
+$ forge build
+```
+
+### Test
+
+```shell
+$ forge test
+```
+
+### Format
+
+```shell
+$ forge fmt
+```
+
+### Gas Snapshots
+
+```shell
+$ forge snapshot
+```
+
+### Anvil
+
+```shell
+$ anvil
+```
+
+### Deploy
+
+```shell
+$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+```
+
+### Cast
+
+```shell
+$ cast <subcommand>
+```
+
+### Help
+
+```shell
+$ forge --help
+$ anvil --help
+$ cast --help
+```

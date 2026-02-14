@@ -1,0 +1,9 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.24"
+
+[rpc_endpoints]
+taurus = "wss://auto-evm.taurus.autonomys.xyz/ws"
+autonomys = "wss://auto-evm.mainnet.autonomys.xyz/ws"
