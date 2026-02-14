@@ -1,66 +1,86 @@
-## Foundry
+# Autonomys Memory Chain
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Smart contract for storing AI agent memory chain heads on the Autonomys Network EVM.
 
-Foundry consists of:
+## What It Does
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+AI agents save experiences as a linked list on [Auto-Drive](https://ai3.storage) (decentralized storage). Each entry contains a `previousCid` pointing to the prior one. This contract stores the **latest CID on-chain** so that even if all local state is lost, an agent can look up its chain head and reconstruct its full memory history.
 
-## Documentation
+```
+Agent Wallet → Contract → Latest CID → Auto-Drive → Full Memory Chain
+     ↓
+  0x92D8...  →  "bafkr6ie57..."  →  [Memory 2] → [Memory 1 (genesis)]
+```
 
-https://book.getfoundry.sh/
+## Contract
+
+| Network | Address | Chain ID |
+|---------|---------|----------|
+| Autonomys Mainnet EVM | [`0x51DAedAFfFf631820a4650a773096A69cB199A3c`](https://explorer.auto-evm.mainnet.autonomys.xyz/address/0x51DAedAFfFf631820a4650a773096A69cB199A3c?tab=contract) | 870 |
+
+**Verified on [Autonomys Block Explorer](https://explorer.auto-evm.mainnet.autonomys.xyz/address/0x51DAedAFfFf631820a4650a773096A69cB199A3c?tab=contract)**
+
+## How It Works
+
+The contract is intentionally minimal — 15 lines of Solidity:
+
+- **`updateHead(string cid)`** — Store your latest CID (scoped to `msg.sender`)
+- **`getHead(address agent)`** — Look up any agent's chain head (public, anyone can read)
+- **`HeadUpdated` event** — Emitted on every update for indexing/monitoring
+
+Each wallet address controls only its own entry. Multi-tenant by default — any agent with a wallet can use it.
+
+## Resurrection Flow
+
+1. New agent instance starts with no local state
+2. Calls `getHead(myAddress)` on the contract → gets latest CID
+3. Downloads that CID from Auto-Drive → gets the newest memory entry
+4. Follows `previousCid` links to traverse the full chain
+5. Agent reconstructs its entire memory history
 
 ## Usage
 
-### Build
+### Read an agent's chain head (no gas, no wallet needed)
 
-```shell
-$ forge build
+```bash
+cast call 0x51DAedAFfFf631820a4650a773096A69cB199A3c \
+  "getHead(address)" <AGENT_ADDRESS> \
+  --rpc-url wss://auto-evm.mainnet.autonomys.xyz/ws
 ```
 
-### Test
+### Update your chain head
 
-```shell
-$ forge test
+```bash
+cast send 0x51DAedAFfFf631820a4650a773096A69cB199A3c \
+  "updateHead(string)" "<YOUR_CID>" \
+  --rpc-url wss://auto-evm.mainnet.autonomys.xyz/ws \
+  --private-key $PRIVATE_KEY
 ```
 
-### Format
+### Shell helper
 
-```shell
-$ forge fmt
+```bash
+export CONTRACT_ADDRESS=0x51DAedAFfFf631820a4650a773096A69cB199A3c
+export PRIVATE_KEY=0x...
+export MEMORY_CID=bafkr6ie...
+./script/update-head.sh
 ```
 
-### Gas Snapshots
+## Build & Test
 
-```shell
-$ forge snapshot
+Requires [Foundry](https://getfoundry.sh/).
+
+```bash
+forge build
+forge test -v
 ```
 
-### Anvil
+## Related
 
-```shell
-$ anvil
-```
+- **[openclaw-skill-auto-drive](https://github.com/autojeremy/openclaw-skill-auto-drive)** — OpenClaw skill for Auto-Drive uploads, downloads, and memory chain management
+- **[Auto-Drive](https://ai3.storage)** — Permanent decentralized storage on Autonomys Network
+- **[OpenClaw](https://openclaw.ai)** — AI agent framework
 
-### Deploy
+## License
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+MIT
